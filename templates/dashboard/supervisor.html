@@ -1,0 +1,19 @@
+<h1>Dashboard Supervisor</h1>
+<ul>
+  <li>Solicitados: {{ total_solicitados }}</li>
+  <li>Aprobados: {{ total_aprobados }}</li>
+  <li>En salida: {{ en_salida }}</li>
+  <li>Pendiente arribo: {{ pendientes_arribo }}</li>
+</ul>
+<p>
+  {% if bloqueo and bloqueo.is_blocked %}⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}{% else %}✅ Operación habilitada{% endif %}
+</p>
+<form method="post" action="/bloqueo/toggle/">{% csrf_token %}
+  <input name="motivo" placeholder="Motivo (opcional)">
+  <button type="submit">{% if bloqueo and bloqueo.is_blocked %}Desbloquear{% else %}Activar bloqueo{% endif %}</button>
+</form>
+
+<h3>Últimos movimientos</h3>
+<ul>
+  {% for m in ultimos %}<li>{{ m.embarcacion.matricula }} - {{ m.estado }}</li>{% empty %}<li>Sin movimientos</li>{% endfor %}
+</ul>

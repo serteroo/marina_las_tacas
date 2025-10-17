@@ -83,23 +83,24 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    # Placeholder por rol (Supervisor/Secretaría/Socio). Luego lo separamos.
-    return render(request, "dashboard/index.html", {})
+    if is_supervisor(request.user):
+        return redirect("dashboard_supervisor")
+    # (luego pondremos el dashboard del Socio)
+    return render(request, "dashboard/index.html")
 
 @login_required
 def contrato_externo_new(request):
-    org = Organization.objects.get(name="Mrina Las Tacas")
+    prof = UserProfile.objects.get(user=request.user)
+    org = prof.organization
     if request.method == "POST":
         form = ContratoExternoForm(request.POST, request.FILES)
         if form.is_valid():
             contrato = form.save(commit=False)
             contrato.organization = org
-            # por defecto NO validada la licencia hasta que supervisor revise:
             contrato.licencia_validada = False
             contrato.save()
-            from django.contrib import messages
             messages.success(request, "Contrato ingresado. Pendiente de validación de licencia.")
-            return redirect("dashboard")
+            return redirect("dashboard_supervisor")
     else:
         form = ContratoExternoForm()
     return render(request, "accounts/contrato_externo_form.html", {"form": form})
@@ -110,12 +111,15 @@ def is_supervisor(user):
 @login_required
 @user_passes_test(is_supervisor)
 def dashboard_supervisor(request):
+    prof = UserProfile.objects.get(user=request.user)
+    org = prof.organization
     ctx = {
-        "total_solicitados": Movimiento.objects.filter(estado="SOLICITADO").count(),
-        "total_aprobados": Movimiento.objects.filter(estado="APROBADO").count(),
-        "en_salida": Movimiento.objects.filter(estado="EN_SALIDA").count(),
-        "pendientes_arribo": Movimiento.objects.filter(estado__in=["EN_SALIDA","EN_ARRIBO"]).count(),
-        "ultimos": Movimiento.objects.order_by("-id")[:10],
-        "bloqueo": BloqueoClima.objects.first(),
+        "total_solicitados": Movimiento.objects.filter(organization=org, estado="SOLICITADO").count(),
+        "total_aprobados":  Movimiento.objects.filter(organization=org, estado="APROBADO").count(),
+        "en_salida":        Movimiento.objects.filter(organization=org, estado="EN_SALIDA").count(),
+        "pendientes_arribo":Movimiento.objects.filter(organization=org, estado__in=["EN_SALIDA","EN_ARRIBO"]).count(),
+        "ultimos":          Movimiento.objects.filter(organization=org).order_by("-id")[:10],
+        "bloqueo":          BloqueoClima.objects.filter(organization=org).first(),
     }
     return render(request, "dashboard/supervisor.html", ctx)
+
