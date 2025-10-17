@@ -1,3 +1,6 @@
 from django.contrib import admin
-
-# Register your models here.
+from .models import Organization, UserProfile, MFAChallenge, ContratoExterno
+admin.site.register(Organization)
+admin.site.register(UserProfile)
+admin.site.register(MFAChallenge)
+admin.site.register(ContratoExterno)

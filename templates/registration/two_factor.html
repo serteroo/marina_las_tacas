@@ -1,0 +1,7 @@
+<h1>Verificación en dos pasos</h1>
+<form method="post">{% csrf_token %}
+  <label>Código recibido:</label><br>
+  <input name="code" pattern="\d{6}" required><br>
+  <button type="submit">Verificar</button>
+</form>
+{% for m in messages %}<p>{{ m }}</p>{% endfor %}
