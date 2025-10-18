@@ -17,3 +17,26 @@
 <ul>
   {% for m in ultimos %}<li>{{ m.embarcacion.matricula }} - {{ m.estado }}</li>{% empty %}<li>Sin movimientos</li>{% endfor %}
 </ul>
+<h3>Acciones de prueba</h3>
+<p>Solicitar (como admin actuando de socio) para la embarcación ID 1:</p>
+<p><a href="/zarpe/solicitar/1/">Solicitar zarpe (emb 1)</a></p>
+
+<h3>Gestionar últimos</h3>
+<ul>
+  {% for m in ultimos %}
+    <li>
+      {{ m.embarcacion.matricula }} - {{ m.estado }}
+      {% if m.estado == "SOLICITADO" %}
+        | <a href="/zarpe/aprobar/{{ m.id }}/">Aprobar</a>
+      {% endif %}
+      {% if m.estado in "APROBADO,EN_SALIDA" %}
+        | <a href="/zarpe/salida/{{ m.id }}/">Marcar salida</a>
+      {% endif %}
+      {% if m.estado in "EN_SALIDA,EN_ARRIBO,APROBADO" %}
+        | <a href="/zarpe/arribo/{{ m.id }}/">Marcar arribo</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>Sin movimientos</li>
+  {% endfor %}
+</ul>
