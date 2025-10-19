@@ -1,12 +1,13 @@
-# operaciones/views.py
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404, render
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
-from accounts.models import UserProfile
+from accounts.models import UserProfile, ContratoExterno
 from .models import Embarcacion, Movimiento, BloqueoClima
 from accounts.views import is_supervisor
 from .forms import AprobarZarpeForm
+from .forms import SolicitarZarpeForm
+from django.utils import timezone
 
 def healthz(request): return HttpResponse("ok")
 
@@ -28,21 +29,45 @@ def solicitar_zarpe(request, emb_id):
     prof = UserProfile.objects.get(user=request.user)
     emb = get_object_or_404(Embarcacion, id=emb_id, organization=prof.organization)
 
-    # si hay bloqueo clima y NO es supervisor, no permite
+    # Debe ser el propietario
+    if emb.propietario_id != prof.id and not is_supervisor(request.user):
+        return HttpResponseForbidden("No puedes solicitar zarpe para esta embarcación.")
+
+    # Bloqueo clima (solo supervisor puede saltarlo)
     bloqueo = BloqueoClima.objects.filter(organization=prof.organization, is_blocked=True).first()
     if bloqueo and not is_supervisor(request.user):
         return HttpResponseForbidden("Bloqueo por clima activo.")
 
-    mov = Movimiento.objects.create(
-        organization=prof.organization,
-        socio=prof,
-        embarcacion=emb,
-        estado="SOLICITADO",
-    )
-    return redirect("dashboard_supervisor")  # luego haremos páginas dedicadas
+    # Externo sin licencia válida: bloqueo total
+    es_externo = getattr(prof, "es_externo", False)
+    if es_externo and not is_supervisor(request.user):
+        hoy = timezone.now().date()
+        ok = ContratoExterno.objects.filter(
+            organization=prof.organization, email=request.user.email,
+            licencia_validada=True, licencia_vencimiento__gt=hoy
+        ).exists()
+        if not ok:
+            return HttpResponseForbidden("Externo sin licencia válida o vencida.")
 
-from .forms import AprobarZarpeForm
-from django.utils import timezone
+    if request.method == "POST":
+        form = SolicitarZarpeForm(request.POST)
+        if form.is_valid():
+            mov = Movimiento.objects.create(
+                organization=prof.organization,
+                socio=prof,
+                embarcacion=emb,
+                estado="SOLICITADO",
+                pasajeros=form.cleaned_data["pasajeros"],
+                destino=form.cleaned_data.get("destino") or "",
+                nota=form.cleaned_data.get("nota") or "",
+                eta=form.cleaned_data.get("eta_sugerida"),  # supervisor puede ajustar al aprobar
+            )
+            # feedback simple
+            return redirect("dashboard_socio" if not is_supervisor(request.user) else "dashboard_supervisor")
+    else:
+        form = SolicitarZarpeForm()
+
+    return render(request, "operaciones/solicitar_zarpe.html", {"form": form, "emb": emb})
 
 @login_required
 @user_passes_test(is_supervisor)
@@ -67,7 +92,6 @@ def aprobar_zarpe(request, mov_id):
         form = AprobarZarpeForm(initial={"eta": inicial, "tolerancia_min": 15})
 
     return render(request, "operaciones/aprobar_zarpe.html", {"form": form, "mov": mov})
-
 
 @login_required
 def marcar_salida(request, mov_id):

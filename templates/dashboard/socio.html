@@ -1,0 +1,33 @@
+<h1>Mi panel</h1>
+
+<p>
+  {% if bloqueo and bloqueo.is_blocked %}
+    ⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}
+  {% else %}
+    ✅ Bloqueo por clima desactivado:
+  {% endif %}
+</p>
+
+<h3>Mis embarcaciones</h3>
+<ul>
+  {% for e in mis_embarcaciones %}
+    <li>
+      {{ e.matricula }} ({{ e.tipo }})
+      {% if not bloqueo or not bloqueo.is_blocked %}
+        — <a href="{% url 'solicitar_zarpe' e.id %}">Solicitar zarpe</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No tienes embarcaciones registradas.</li>
+  {% endfor %}
+</ul>
+
+<h3>Mis últimos movimientos</h3>
+<ul>
+  {% for m in mis_movimientos %}
+    <li>{{ m.embarcacion.matricula }} — {{ m.estado }}</li>
+  {% empty %}
+    <li>Sin movimientos.</li>
+  {% endfor %}
+</ul>
+

@@ -1,0 +1,9 @@
+<h1>Solicitar zarpe — {{ emb.matricula }}</h1>
+<form method="post">
+  {% csrf_token %}
+  <p>{{ form.pasajeros.label_tag }} {{ form.pasajeros }}</p>
+  <p>{{ form.destino.label_tag }} {{ form.destino }}</p>
+  <p>{{ form.nota.label_tag }} {{ form.nota }}</p>
+  <p>{{ form.eta_sugerida.label_tag }} {{ form.eta_sugerida }}</p>
+  <button type="submit">Enviar solicitud</button>
+</form>

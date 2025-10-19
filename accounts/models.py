@@ -10,8 +10,8 @@ class Organization(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
-    rut = models.CharField(max_length=12, unique=True, validators=[validar_rut_formato])
-    telefono = models.CharField(max_length=20, unique=True)
+    rut = models.CharField(max_length=12, unique=True, null=True, blank=True)
+    telefono = models.CharField(max_length=20, unique=True, null=True, blank=True)
     mfa_enabled = models.BooleanField(default=True)
     mfa_method = models.CharField(max_length=10, choices=[("email","Email"),("sms","SMS"),("both","Ambos")], default="email")
     def __str__(self): return f"{self.user.username} @ {self.organization.name}"
