@@ -1,0 +1,7 @@
+<h1>Aprobar zarpe — {{ mov.embarcacion.matricula }}</h1>
+<form method="post">
+  {% csrf_token %}
+  <p>{{ form.eta.label_tag }} {{ form.eta }}</p>
+  <p>{{ form.tolerancia_min.label_tag }} {{ form.tolerancia_min }}</p>
+  <button type="submit">Aprobar</button>
+</form>

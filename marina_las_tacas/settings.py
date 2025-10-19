@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'marina_las_tacas.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-ENGINE = os.getenv("DB_ENGINE","mysql")
+ENGINE = os.getenv("DB_ENGINE","sqlite")
 if ENGINE == "mysql":
     DATABASES = {"default": {
         "ENGINE":"django.db.backends.mysql",

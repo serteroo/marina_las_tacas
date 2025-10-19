@@ -6,7 +6,7 @@
   <li>Pendiente arribo: {{ pendientes_arribo }}</li>
 </ul>
 <p>
-  {% if bloqueo and bloqueo.is_blocked %}⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}{% else %}✅ Operación habilitada{% endif %}
+  {% if bloqueo and bloqueo.is_blocked %}⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}{% else %}✅ Bloqueo por clima desactivado{% endif %}
 </p>
 <form method="post" action="/bloqueo/toggle/">{% csrf_token %}
   <input name="motivo" placeholder="Motivo (opcional)">
@@ -27,7 +27,7 @@
     <li>
       {{ m.embarcacion.matricula }} - {{ m.estado }}
       {% if m.estado == "SOLICITADO" %}
-        | <a href="/zarpe/aprobar/{{ m.id }}/">Aprobar</a>
+        | <a href="/zarpe/aprobar/{{ m.id }}/">Aprobar (ETA/Tolerancia)</a>
       {% endif %}
       {% if m.estado in "APROBADO,EN_SALIDA" %}
         | <a href="/zarpe/salida/{{ m.id }}/">Marcar salida</a>
