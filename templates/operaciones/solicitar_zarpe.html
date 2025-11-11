@@ -1,9 +1,35 @@
-<h1>Solicitar zarpe — {{ emb.matricula }}</h1>
+<h1>Solicitar zarpe — {{ embarcacion.matricula }}</h1>
+
 <form method="post">
   {% csrf_token %}
-  <p>{{ form.pasajeros.label_tag }} {{ form.pasajeros }}</p>
-  <p>{{ form.destino.label_tag }} {{ form.destino }}</p>
-  <p>{{ form.nota.label_tag }} {{ form.nota }}</p>
-  <p>{{ form.eta_sugerida.label_tag }} {{ form.eta_sugerida }}</p>
+  <p><strong>Embarcación:</strong> {{ embarcacion.matricula }} ({{ embarcacion.tipo }})</p>
+
+  <div>
+    <label>Pasajeros:</label>
+    {{ form.pasajeros }}
+  </div>
+
+  <div>
+    <label>Destino:</label>
+    {{ form.destino }}
+  </div>
+
+  <div>
+    <label>ETA (hora estimada de arribo):</label>
+    {{ form.eta }}
+  </div>
+
+  <div>
+    <label>Tolerancia (min):</label>
+    {{ form.tolerancia_min }}
+  </div>
+
+  <div>
+    <label>Nota:</label>
+    {{ form.nota }}
+  </div>
+
   <button type="submit">Enviar solicitud</button>
 </form>
+
+

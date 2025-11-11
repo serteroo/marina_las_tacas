@@ -3,6 +3,8 @@ from django.db import models
 from django.core.validators import EmailValidator
 from .validators import validar_rut_formato
 
+
+
 class Organization(models.Model):
     name = models.CharField(max_length=150, unique=True)
     def __str__(self): return self.name
@@ -41,4 +43,32 @@ class ContratoExterno(models.Model):
     class Meta:
         unique_together = [("rut","licencia_numero")]  # no duplicar contratos de la misma persona
     def __str__(self): return f"{self.rut} - {self.apellido}, {self.nombre}"
+
+class Applicant(models.Model):
+    STATUS = (('pending','Pendiente'),('approved','Aprobado'),('rejected','Rechazado'))
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    rut = models.CharField(max_length=12, unique=True, error_messages={"unique": "Ya existe un solicitante con este RUT."})
+    direccion = models.CharField(max_length=200)
+    email = models.EmailField(unique=True, error_messages={"unique": "Ya existe un solicitante con este email."})
+    telefono = models.CharField(max_length=20)
+    numero_licencia = models.CharField(max_length=30)
+    vencimiento_licencia = models.DateField()
+    estado = models.CharField(max_length=10, choices=STATUS, default='pending')
+    motivo_revision = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='reviews')
+    def __str__(self): return f"{self.nombre} {self.apellido} - {self.rut}"
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rut = models.CharField(max_length=12, unique=True)
+    direccion = models.CharField(max_length=200)
+    telefono = models.CharField(max_length=20)
+    numero_licencia = models.CharField(max_length=30)
+    vencimiento_licencia = models.DateField()
+    must_change_password = models.BooleanField(default=True)
+    es_socio = models.BooleanField(default=True)
+    def __str__(self): return self.user.get_username()
 

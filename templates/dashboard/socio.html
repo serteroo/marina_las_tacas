@@ -1,20 +1,38 @@
-<h1>Mi panel</h1>
+<!-- templates/dashboard/socio.html -->
+<div style="display:flex; align-items:center; justify-content:space-between;">
+  <h1>Dashboard</h1>
 
-<p>
-  {% if bloqueo and bloqueo.is_blocked %}
-    ⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}
-  {% else %}
-    ✅ Bloqueo por clima desactivado:
-  {% endif %}
-</p>
+  <div>
+    {{ request.user.get_full_name|default:request.user.username }}
+    <form method="post" action="{% url 'accounts:logout' %}" style="display:inline; margin-left:8px;">
+      {% csrf_token %}
+      <button type="submit">Cerrar sesión</button>
+    </form>
+  </div>
+</div>
+<hr>
 
+
+
+<!-- Estado de bloqueo -->
+{% if bloqueo and bloqueo.is_blocked %}
+  <p>⚠️ Bloqueo por clima activo{% if bloqueo.motivo %}: {{ bloqueo.motivo }}{% endif %}</p>
+{% else %}
+  <p>✅ Bloqueo por clima desactivado</p>
+{% endif %}
+
+<hr>
+
+<!-- Mis embarcaciones -->
 <h3>Mis embarcaciones</h3>
 <ul>
-  {% for e in mis_embarcaciones %}
+  {% for e in embarcaciones %}
     <li>
       {{ e.matricula }} ({{ e.tipo }})
       {% if not bloqueo or not bloqueo.is_blocked %}
-        — <a href="{% url 'solicitar_zarpe' e.id %}">Solicitar zarpe</a>
+        — <a href="{% url 'operaciones:solicitar_zarpe' e.id %}">Solicitar zarpe</a>
+      {% else %}
+        — <em>Solicitud deshabilitada por bloqueo</em>
       {% endif %}
     </li>
   {% empty %}
@@ -22,12 +40,17 @@
   {% endfor %}
 </ul>
 
-<h3>Mis últimos movimientos</h3>
+<hr>
+
+<!-- Últimos movimientos -->
+<h3>Últimos movimientos</h3>
 <ul>
-  {% for m in mis_movimientos %}
-    <li>{{ m.embarcacion.matricula }} — {{ m.estado }}</li>
+  {% for m in ultimos %}
+    <li>
+      {{ m.embarcacion.matricula }} — {{ m.estado }}
+      {% if m.eta %} — ETA {{ m.eta|date:"d-m H:i" }}{% endif %}
+    </li>
   {% empty %}
-    <li>Sin movimientos.</li>
+    <li>Sin movimientos</li>
   {% endfor %}
 </ul>
-

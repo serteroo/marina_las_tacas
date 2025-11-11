@@ -1,9 +1,17 @@
 <h1>Marina Las Tacas</h1>
-<form method="post">{% csrf_token %}
+
+<form method="post">
+  {% csrf_token %}
   <label>Usuario / Email / RUT:</label><br>
   <input name="username" required><br>
   <label>Contraseña:</label><br>
   <input name="password" type="password" required><br>
   <button type="submit">Ingresar</button>
 </form>
+
 {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+
+<p>¿Eres Nuevo?
+  <a href="{% url 'accounts:public_register' %}">Solicita tu cuenta</a>
+
+</p>

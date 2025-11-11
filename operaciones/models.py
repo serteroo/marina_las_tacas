@@ -29,7 +29,13 @@ class Movimiento(models.Model):
     tolerancia_min = models.PositiveIntegerField(default=0)
     hora_arribo = models.DateTimeField(null=True, blank=True)
     observaciones = models.TextField(blank=True)
-    def __str__(self): return f"{self.embarcacion.matricula} - {self.estado}"
+    pasajeros = models.PositiveIntegerField(default=1)
+    destino = models.CharField(max_length=120, blank=True)
+    nota = models.CharField(max_length=240, blank=True)
+
+
+    def __str__(self):
+        return f"{self.embarcacion.matricula} - {self.estado}"
 
 class BloqueoClima(models.Model):
     organization = models.OneToOneField(Organization, on_delete=models.CASCADE)

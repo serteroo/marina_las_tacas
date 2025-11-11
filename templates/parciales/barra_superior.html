@@ -1,0 +1,19 @@
+<!-- templates/parciales/barra_superior.html -->
+<div style="
+  display:flex; justify-content:space-between; align-items:center;
+  gap:.75rem; padding:.75rem 1rem; border-bottom:1px solid #eee;
+">
+  <strong>Dashboard</strong>
+
+  <div style="display:flex; align-items:center; gap:.75rem;">
+    <span style="opacity:.85;">
+      {{ request.user.get_full_name|default:request.user.username }}
+    </span>
+
+    <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{% url 'accounts:login' %}">
+      <button type="submit" style="cursor:pointer;">Cerrar sesión</button>
+    </form>
+  </div>
+</div>

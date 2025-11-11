@@ -1,40 +1,101 @@
-<h1>Dashboard Supervisor</h1>
+<!-- templates/dashboard/supervisor.html -->
+<div style="display:flex; align-items:center; justify-content:space-between;">
+  <h1>Dashboard Supervisor</h1>
+
+  <div>
+    {{ request.user.get_full_name|default:request.user.username }}
+    <form method="post" action="{% url 'accounts:logout' %}" style="display:inline; margin-left:8px;">
+      {% csrf_token %}
+      <button type="submit">Cerrar sesión</button>
+    </form>
+  </div>
+</div>
+
+<hr>
+
+<h3>Solicitudes de acceso ({{ postulantes_pendientes_count }})</h3>
+<p><a href="{% url 'accounts:review_list' %}">Ver todas las solicitudes</a></p>
+
+{% if postulantes_pendientes %}
+  <ul>
+    {% for a in postulantes_pendientes %}
+      <li>
+        {{ a.nombre }} {{ a.apellido }} — {{ a.rut }} — {{ a.email }}
+
+        <!-- Acciones rápidas -->
+        <form action="{% url 'accounts:approve_applicant' a.pk %}" method="post" style="display:inline">
+          {% csrf_token %}
+          <button>Aprobar</button>
+        </form>
+        <form action="{% url 'accounts:reject_applicant' a.pk %}" method="post" style="display:inline">
+          {% csrf_token %}
+          <input name="motivo" placeholder="Motivo">
+          <button>Rechazar</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<hr>
+
 <ul>
   <li>Solicitados: {{ total_solicitados }}</li>
   <li>Aprobados: {{ total_aprobados }}</li>
   <li>En salida: {{ en_salida }}</li>
   <li>Pendiente arribo: {{ pendientes_arribo }}</li>
 </ul>
+
 <p>
-  {% if bloqueo and bloqueo.is_blocked %}⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}{% else %}✅ Bloqueo por clima desactivado{% endif %}
+  {% if bloqueo and bloqueo.is_blocked %}
+    ⚠️ Bloqueo por clima activo: {{ bloqueo.motivo }}
+  {% else %}
+    ✅ Bloqueo por clima desactivado
+  {% endif %}
 </p>
-<form method="post" action="/bloqueo/toggle/">{% csrf_token %}
+
+<form method="post" action="{% url 'operaciones:toggle_bloqueo' %}">
+  {% csrf_token %}
   <input name="motivo" placeholder="Motivo (opcional)">
-  <button type="submit">{% if bloqueo and bloqueo.is_blocked %}Desbloquear{% else %}Activar bloqueo{% endif %}</button>
+  <button type="submit">
+    {% if bloqueo and bloqueo.is_blocked %}Desbloquear{% else %}Activar bloqueo{% endif %}
+  </button>
 </form>
 
 <h3>Últimos movimientos</h3>
 <ul>
-  {% for m in ultimos %}<li>{{ m.embarcacion.matricula }} - {{ m.estado }}</li>{% empty %}<li>Sin movimientos</li>{% endfor %}
-</ul>
-
-<h3>Gestionar últimos</h3>
-<ul>
   {% for m in ultimos %}
     <li>
       {{ m.embarcacion.matricula }} - {{ m.estado }}
-      {% if m.id in atrasados %}<strong> ⚠︎ ATRASADO</strong>{% endif %}
+      {% if atrasados and m.id in atrasados %}
+        <strong> ⚠︎ ATRASADO</strong>
+      {% endif %}
+
       {% if m.estado == "SOLICITADO" %}
-        | <a href="/zarpe/aprobar/{{ m.id }}/">Aprobar (ETA/Tolerancia)</a>
+        | <a href="{% url 'operaciones:aprobar_zarpe' m.id %}">Revisar Solicitud</a>
       {% endif %}
+
       {% if m.estado in "APROBADO,EN_SALIDA" %}
-        | <a href="/zarpe/salida/{{ m.id }}/">Marcar salida</a>
+        | <a href="{% url 'operaciones:marcar_salida' m.id %}">Marcar salida</a>
       {% endif %}
+
       {% if m.estado in "EN_SALIDA,EN_ARRIBO,APROBADO" %}
-        | <a href="/zarpe/arribo/{{ m.id }}/">Marcar arribo</a>
+        | <a href="{% url 'operaciones:marcar_arribo' m.id %}">Marcar arribo</a>
       {% endif %}
     </li>
   {% empty %}
     <li>Sin movimientos</li>
+  {% endfor %}
+</ul>
+
+<h3>Solicitudes pendientes</h3>
+<ul>
+  {% for m in pendientes %}
+    <li>
+      {{ m.embarcacion.matricula }} — {{ m.socio.user.get_full_name|default:m.socio.user.username }}
+      — <a href="{% url 'operaciones:aprobar_zarpe' m.id %}">Revisar / Aprobar / Rechazar</a>
+    </li>
+  {% empty %}
+    <li>No hay solicitudes.</li>
   {% endfor %}
 </ul>

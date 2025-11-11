@@ -1,7 +1,18 @@
-<h1>Aprobar zarpe — {{ mov.embarcacion.matricula }}</h1>
-<form method="post">
+<h1>Revisión de solicitud — {{ mov.embarcacion.matricula }}</h1>
+
+<ul>
+  <li><strong>Socio:</strong> {{ mov.socio.user.get_full_name|default:mov.socio.user.username }}</li>
+  <li><strong>RUT socio:</strong> {{ mov.socio.rut }}</li>
+  <li><strong>Embarcación:</strong> {{ mov.embarcacion.matricula }} ({{ mov.embarcacion.tipo }})</li>
+  <li><strong>Pasajeros:</strong> {{ mov.pasajeros }}</li>
+  <li><strong>Destino:</strong> {{ mov.destino|default:"—" }}</li>
+  <li><strong>ETA:</strong> {{ mov.eta|date:"d-m-Y H:i" }}</li>
+  <li><strong>Tolerancia:</strong> {{ mov.tolerancia_min }} min</li>
+  <li><strong>Nota:</strong> {{ mov.nota|linebreaksbr }}</li>
+</ul>
+
+<form method="post" style="margin-top:1rem">
   {% csrf_token %}
-  <p>{{ form.eta.label_tag }} {{ form.eta }}</p>
-  <p>{{ form.tolerancia_min.label_tag }} {{ form.tolerancia_min }}</p>
-  <button type="submit">Aprobar</button>
+  <button name="aprobar"  type="submit">Aprobar</button>
+  <button name="rechazar" type="submit">Rechazar</button>
 </form>

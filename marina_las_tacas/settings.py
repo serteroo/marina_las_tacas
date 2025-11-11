@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.MustChangePasswordMiddleware'
 ]
 
 ROOT_URLCONF = 'marina_las_tacas.urls'
@@ -79,7 +80,7 @@ WSGI_APPLICATION = 'marina_las_tacas.wsgi.application'
 ENGINE = os.getenv("DB_ENGINE","sqlite")
 if ENGINE == "mysql":
     DATABASES = {"default": {
-        "ENGINE":"django.db.backends.mysql",
+        "ENGINE":"django.db.backends.sqlite3",
         "NAME": os.getenv("DB_NAME","marina"),
         "USER": os.getenv("DB_USER","usuario"),
         "PASSWORD": os.getenv("DB_PASSWORD","clave"),
@@ -135,9 +136,9 @@ MEDIA_URL = "/media/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_ROOT = BASE_DIR / "media"
 
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "login"
+LOGIN_URL = 'accounts:login'
+LOGOUT_REDIRECT_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'accounts:dashboard'
 
 # Email (dev: escribe en consola)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

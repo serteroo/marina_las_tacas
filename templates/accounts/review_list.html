@@ -1,0 +1,50 @@
+<h1>Solicitudes pendientes</h1>
+
+<form method="get" action="">
+  <input type="text" name="q" placeholder="Buscar por RUT o email" value="{{ request.GET.q|default:'' }}">
+  <button type="submit">Buscar</button>
+</form>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>RUT</th>
+      <th>Email</th>
+      <th>Licencia</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for a in postulantes %}
+      {% with lic=a.numero_licencia|default_if_none:'' venc=a.vencimiento_licencia|default_if_none:'' %}
+      <tr>
+        <td>{{ a.nombre }} {{ a.apellido }}</td>
+        <td>{{ a.rut }}</td>
+        <td>{{ a.email }}</td>
+        <td>
+          Nº {{ lic|default:"—" }}<br>
+          Vence: {{ venc|date:"d-m-Y"|default:"—" }}
+        </td>
+        <td>
+          <form method="post" action="{% url 'accounts:approve_applicant' a.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Aprobar</button>
+          </form>
+
+          <form method="post" action="{% url 'accounts:reject_applicant' a.pk %}" style="display:inline; margin-left:8px;">
+            {% csrf_token %}
+            Motivo: <input type="text" name="motivo" style="width:220px;">
+            <button type="submit">Rechazar</button>
+          </form>
+        </td>
+      </tr>
+      {% endwith %}
+    {% empty %}
+      <tr>
+        <td colspan="5">No hay solicitudes pendientes.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

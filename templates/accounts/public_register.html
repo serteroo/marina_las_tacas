@@ -1,0 +1,14 @@
+<h2>Solicitud de acceso</h2>
+
+{% if messages %}
+<ul>
+  {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Enviar solicitud</button>
+</form>
+

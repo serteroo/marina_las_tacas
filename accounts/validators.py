@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 RUT_REGEX = r"^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$"
 
+
 def validar_rut_formato(rut:str):
     if not re.match(RUT_REGEX, rut):
         raise ValidationError("RUT inválido. Formato esperado: xx.xxx.xxx-x")

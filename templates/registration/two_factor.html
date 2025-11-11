@@ -1,7 +1,48 @@
 <h1>Verificación en dos pasos</h1>
-<form method="post">{% csrf_token %}
+
+{% for m in messages %}<p>{{ m }}</p>{% endfor %}
+
+<form method="post">
+  {% csrf_token %}
   <label>Código recibido:</label><br>
-  <input name="code" pattern="\d{6}" required><br>
+  <input
+    name="code"
+    pattern="\d{6}"
+    inputmode="numeric"
+    maxlength="6"
+    autocomplete="one-time-code"
+    required
+  ><br>
   <button type="submit">Verificar</button>
 </form>
-{% for m in messages %}<p>{{ m }}</p>{% endfor %}
+
+<hr>
+
+<form id="resend-form" method="post" action="{% url 'accounts:two_factor_resend' %}" style="display:inline;">
+  {% csrf_token %}
+  <button id="resend-btn" type="submit">Reenviar código</button>
+  <span id="resend-countdown" style="margin-left:6px;"></span>
+</form>
+
+<script>
+  (function () {
+    // segundos que faltan para poder reenviar (los pasa la view)
+    var remaining = parseInt('{{ resend_seconds|default:"0" }}', 10) || 0;
+    var btn = document.getElementById('resend-btn');
+    var cd  = document.getElementById('resend-countdown');
+
+    function tick() {
+      if (remaining <= 0) {
+        btn.disabled = false;
+        cd.textContent = '';
+        return;
+      }
+      btn.disabled = true;
+      cd.textContent = 'Disponible en ' + remaining + 's';
+      remaining -= 1;
+      setTimeout(tick, 1000);
+    }
+
+    tick();
+  })();
+</script>
