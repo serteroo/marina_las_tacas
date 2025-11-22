@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Revisar solicitud #{{ mov.id }}</title></head>
+<body>
+  <h3>Revisar solicitud #{{ mov.id }}</h3>
+
+  <h4>Embarcación</h4>
+  <ul>
+    <li>Código: {{ mov.embarcacion.codigo }}</li>
+    <li>Nombre: {{ mov.embarcacion.nombre|default:"—" }}</li>
+  </ul>
+
+  <h4>Socio</h4>
+  <ul>
+    <li>{{ mov.socio.user.get_full_name|default:mov.socio.user.username }}</li>
+  </ul>
+
+  <h4>Detalle</h4>
+  <ul>
+    <li>Estado: {{ mov.get_estado_display }}</li>
+    <li>Creado: {{ mov.created_at|date:"d/m/Y H:i" }}</li>
+  </ul>
+
+  <p>
+    <a href="{% url 'operaciones:movimiento_aprobar' mov.pk %}">Aprobar</a> |
+    <a href="{% url 'operaciones:movimiento_rechazar' mov.pk %}">Rechazar</a> |
+    <a href="{% url 'accounts:dashboard_supervisor' %}">Volver</a>
+  </p>
+</body>
+</html>

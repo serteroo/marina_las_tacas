@@ -1,0 +1,46 @@
+{% include "parciales/menu_simple.html" with active_nav="embarcaciones_list" menu_kind="super" %}
+
+
+<h1>Embarcaciones</h1>
+
+<form method="get" style="margin:12px 0;">
+  <label>Tipo:</label>
+  <select name="tipo">
+    <option value="">(todos)</option>
+    {% for val, lbl in TIPOS %}
+      <option value="{{ val }}" {% if f_tipo == val %}selected{% endif %}>{{ lbl }}</option>
+    {% endfor %}
+  </select>
+
+  <label style="margin-left:12px;">Propietario:</label>
+  <select name="owner">
+    <option value="">(todos)</option>
+    {% for p in propietarios %}
+      <option value="{{ p.id }}" {% if f_owner|default:'' == p.id|stringformat:'s' %}selected{% endif %}>
+        {{ p.user.last_name }}, {{ p.user.first_name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar por matrícula o propietario" style="width:260px; margin-left:12px;">
+  <button type="submit">Filtrar</button>
+  <a href="?">Limpiar</a>
+</form>
+
+<table border="1" cellspacing="0" cellpadding="6">
+  <tr>
+    <th>Tipo</th><th>Matrícula</th><th>Propietario</th><th>Amarra</th>
+  </tr>
+  {% for e in embarcaciones %}
+    <tr>
+      <td>{{ e.get_tipo_display|default:e.tipo }}</td>
+      <td>{{ e.matricula }}</td>
+      <td>{{ e.propietario.user.last_name }}, {{ e.propietario.user.first_name }}</td>
+      <td>{{ e.amarra|default:"—" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">Sin resultados.</td></tr>
+  {% endfor %}
+</table>
+
+<p><a href="{% url 'accounts:dashboard_supervisor' %}">Volver al dashboard</a></p>

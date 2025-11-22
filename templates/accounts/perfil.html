@@ -1,0 +1,19 @@
+{% include "parciales/menu_simple.html" with active_nav="perfil" menu_kind=menu_kind %}
+{% include "parciales/messages.html" %}
+
+
+<!doctype html><meta charset="utf-8">
+<h1>Mi perfil</h1>
+
+<p><strong>Usuario:</strong> {{ request.user.username }}</p>
+<p><strong>Nombre:</strong> {{ request.user.get_full_name|default:"(sin nombre)" }}</p>
+<p><strong>Email:</strong> {{ request.user.email|default:"(sin email)" }}</p>
+<p><strong>Teléfono:</strong> {{ profile.telefono|default:"(sin teléfono)" }}</p>
+<p><strong>Organización:</strong> {{ profile.organization.name }}</p>
+{% if profile.foto %}<p><img src="{{ profile.foto.url }}" alt="Foto" width="120"></p>{% endif %}
+
+<p>
+  <a href="{% url 'accounts:perfil_editar' %}">Editar Email / Teléfono / Foto</a><br>
+  <a href="{% url 'accounts:perfil_cambiar_usuario' %}">Cambiar nombre de usuario</a><br>
+  <a href="{% url 'accounts:dashboard' %}">Volver al dashboard</a>
+</p>

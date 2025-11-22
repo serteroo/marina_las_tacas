@@ -1,0 +1,93 @@
+<div id="topbar">
+  <button id="btn-menu" type="button">☰</button>
+  <div style="float:right;">
+    {{ request.user.get_full_name|default:request.user.username }}
+    <a href="{% url 'accounts:logout' %}">Cerrar sesión</a>
+  </div>
+</div>
+
+{# Si no te pasan active_nav, usa el nombre de la URL actual #}
+{% with cur=active_nav|default:request.resolver_match.url_name %}
+
+<nav id="side-menu" hidden>
+  <ul>
+    {# --- MENÚ PARA SUPERVISOR --- #}
+    {% if menu_kind == 'super' %}
+
+      <li>{% if cur == 'dashboard_supervisor' %}
+            <strong>Dashboard</strong>
+          {% else %}
+            <a href="{% url 'accounts:dashboard_supervisor' %}">Dashboard</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'perfil' or cur == 'perfil_editar' or cur == 'perfil_cambiar_usuario' %}
+            <strong>Mi perfil</strong>
+          {% else %}
+            <a href="{% url 'accounts:perfil' %}">Mi perfil</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'socios_list' %}
+            <strong>Socios</strong>
+          {% else %}
+            <a href="{% url 'accounts:socios_list' %}">Socios</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'embarcaciones_list' %}
+            <strong>Embarcaciones</strong>
+          {% else %}
+            <a href="{% url 'accounts:embarcaciones_list' %}">Embarcaciones</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'contratos_list' %}
+            <strong>Contratos</strong>
+          {% else %}
+            <a href="{% url 'accounts:contratos_list' %}">Contratos</a>
+          {% endif %}
+      </li>
+
+    {# --- MENÚ PARA SOCIO --- #}
+    {% else %}
+
+      <li>{% if cur == 'dashboard' or cur == 'dashboard_socio' %}
+            <strong>Dashboard</strong>
+          {% else %}
+            <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'perfil' or cur == 'perfil_editar' or cur == 'perfil_cambiar_usuario' %}
+            <strong>Mi perfil</strong>
+          {% else %}
+            <a href="{% url 'accounts:perfil' %}">Mi perfil</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'mis_embarcaciones' %}
+            <strong>Mis embarcaciones</strong>
+          {% else %}
+            <a href="{% url 'accounts:mis_embarcaciones' %}">Mis embarcaciones</a>
+          {% endif %}
+      </li>
+
+      <li>{% if cur == 'mis_zarpes' %}
+            <strong>Mis zarpes</strong>
+          {% else %}
+            <a href="{% url 'operaciones:mis_zarpes' %}">Mis zarpes</a>
+          {% endif %}
+      </li>
+
+    {% endif %}
+  </ul>
+</nav>
+{% endwith %}
+
+<script>
+(function(){
+  var b=document.getElementById('btn-menu'), m=document.getElementById('side-menu');
+  if(b&&m){ b.addEventListener('click', function(){ m.hidden = !m.hidden; }); }
+})();
+</script>

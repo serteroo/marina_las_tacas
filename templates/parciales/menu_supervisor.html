@@ -1,0 +1,24 @@
+<div id="topbar">
+  <button id="btn-menu" type="button">☰</button>
+  <div style="float:right;">
+    {{ request.user.get_full_name|default:request.user.username }}
+    — <a href="{% url 'accounts:logout' %}">Cerrar sesión</a>
+  </div>
+</div>
+
+<nav id="side-menu" hidden>
+  <ul>
+    <li>{% if active_nav == 'dashboard' %}<strong>Dashboard</strong>{% else %}<a href="{% url 'accounts:dashboard_supervisor' %}">Dashboard</a>{% endif %}</li>
+    <li>{% if active_nav == 'perfil' %}<strong>Mi perfil</strong>{% else %}<a href="{% url 'accounts:perfil' %}">Mi perfil</a>{% endif %}</li>
+    <li><a href="{% url 'accounts:perfil_editar' %}">Editar perfil</a></li>
+    <li>{% if active_nav == 'super_socios' %}<strong>Socios</strong>{% else %}<a href="{% url 'accounts:super_socios' %}">Socios</a>{% endif %}</li>
+  </ul>
+</nav>
+
+<script>
+(function(){
+  var btn = document.getElementById('btn-menu');
+  var menu = document.getElementById('side-menu');
+  if (btn && menu) btn.addEventListener('click', function(){ menu.hidden = !menu.hidden; });
+})();
+</script>

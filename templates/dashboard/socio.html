@@ -1,18 +1,8 @@
-<!-- templates/dashboard/socio.html -->
-<div style="display:flex; align-items:center; justify-content:space-between;">
-  <h1>Dashboard</h1>
+{% include "parciales/menu_simple.html" with active_nav="dashboard" menu_kind="user" %}
 
-  <div>
-    {{ request.user.get_full_name|default:request.user.username }}
-    <form method="post" action="{% url 'accounts:logout' %}" style="display:inline; margin-left:8px;">
-      {% csrf_token %}
-      <button type="submit">Cerrar sesión</button>
-    </form>
-  </div>
-</div>
 <hr>
 
-
+<h1>Mi Panel</h1>
 
 <!-- Estado de bloqueo -->
 {% if bloqueo and bloqueo.is_blocked %}

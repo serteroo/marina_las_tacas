@@ -1,0 +1,34 @@
+{% include "parciales/menu_simple.html" with active_nav="mis_zarpes" menu_kind="user" %}
+
+
+<h1>Mis zarpes</h1>
+
+<form method="get" style="margin:12px 0;">
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="">(todos)</option>
+    {% for e in estados %}
+      <option value="{{ e }}"{% if estado == e %} selected{% endif %}>{{ e }}</option>
+    {% endfor %}
+  </select>
+
+  <label style="margin-left:10px;">Límite:</label>
+  <input type="number" name="lim" value="{{ lim }}" min="1" max="200" style="width:70px;">
+  <button type="submit">Aplicar</button>
+</form>
+
+<ul>
+  {% for m in movs %}
+    <li>
+      <strong>{{ m.embarcacion.tipo|default:"Embarcación" }}</strong>
+      — {{ m.embarcacion.matricula }}
+      — <em>{{ m.estado }}</em>
+      {% if m.hora_salida %} — Salida: {{ m.hora_salida|date:"d-m H:i" }}{% endif %}
+      {% if m.hora_arribo %} — Arribo: {{ m.hora_arribo|date:"d-m H:i" }}{% endif %}
+    </li>
+  {% empty %}
+    <li>No hay movimientos.</li>
+  {% endfor %}
+</ul>
+
+<p style="margin-top:12px;"><a href="{% url 'accounts:dashboard' %}">Volver al dashboard</a></p>

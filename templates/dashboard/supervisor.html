@@ -1,15 +1,8 @@
 <!-- templates/dashboard/supervisor.html -->
-<div style="display:flex; align-items:center; justify-content:space-between;">
-  <h1>Dashboard Supervisor</h1>
+{% include "parciales/menu_simple.html" with active_nav="dashboard_supervisor" menu_kind="super" %}
 
-  <div>
-    {{ request.user.get_full_name|default:request.user.username }}
-    <form method="post" action="{% url 'accounts:logout' %}" style="display:inline; margin-left:8px;">
-      {% csrf_token %}
-      <button type="submit">Cerrar sesión</button>
-    </form>
-  </div>
-</div>
+
+<h1>Dashboard Supervisor</h1>
 
 <hr>
 
@@ -66,25 +59,12 @@
 <ul>
   {% for m in ultimos %}
     <li>
-      {{ m.embarcacion.matricula }} - {{ m.estado }}
-      {% if atrasados and m.id in atrasados %}
-        <strong> ⚠︎ ATRASADO</strong>
-      {% endif %}
-
-      {% if m.estado == "SOLICITADO" %}
-        | <a href="{% url 'operaciones:aprobar_zarpe' m.id %}">Revisar Solicitud</a>
-      {% endif %}
-
-      {% if m.estado in "APROBADO,EN_SALIDA" %}
-        | <a href="{% url 'operaciones:marcar_salida' m.id %}">Marcar salida</a>
-      {% endif %}
-
-      {% if m.estado in "EN_SALIDA,EN_ARRIBO,APROBADO" %}
-        | <a href="{% url 'operaciones:marcar_arribo' m.id %}">Marcar arribo</a>
-      {% endif %}
+      {{ m.embarcacion.codigo }} - {{ m.get_estado_display }}
+      {% if m.socio %} — {{ m.socio.user.get_full_name|default:m.socio.user.username }}{% endif %}
+      {% if m.created_at %} · {{ m.created_at|date:"d/m/Y H:i" }}{% endif %}
     </li>
   {% empty %}
-    <li>Sin movimientos</li>
+    <li>No hay movimientos.</li>
   {% endfor %}
 </ul>
 
@@ -92,10 +72,41 @@
 <ul>
   {% for m in pendientes %}
     <li>
-      {{ m.embarcacion.matricula }} — {{ m.socio.user.get_full_name|default:m.socio.user.username }}
-      — <a href="{% url 'operaciones:aprobar_zarpe' m.id %}">Revisar / Aprobar / Rechazar</a>
+      {{ m.embarcacion.codigo }} — {{ m.socio.user.get_full_name|default:m.socio.user.username }}
+      · {{ m.created_at|date:"d/m/Y H:i" }}
+      <a href="{% url 'operaciones:aprobar_zarpe' m.pk %}">Revisar</a>
     </li>
   {% empty %}
-    <li>No hay solicitudes.</li>
+    <li>No hay solicitudes pendientes.</li>
   {% endfor %}
 </ul>
+
+
+<!-- CONTRATOS EXTERNOS -->
+<section id="contratos-externos">
+  <h5>Contratos Externos</h5>
+<p>
+  Registrados hoy: <strong>{{ cx_registrados_hoy }}</strong>
+  &nbsp;|&nbsp;
+  <a href="{% url 'accounts:contrato_externo_new' %}">Nuevo contrato</a>
+</p>
+
+  <hr>
+
+<h3>Últimos contratos</h3>
+<ul>
+  {% for c in cx_ultimos %}
+    <li>
+      <strong>{{ c.nombre }}, {{ c.apellido }}</strong>
+      — {{ c.get_tipo_artefacto_display }}{% if c.detalle_artefacto %}: {{ c.detalle_artefacto }}{% endif %}
+      · {{ c.fecha_inicio|default:"—" }} → {{ c.fecha_fin|default:"—" }}
+      <br><small>{{ c.rut }} · {{ c.email }}</small>
+      <br><a href="{% url 'accounts:contrato_externo_detail' c.pk %}">Ver</a>
+    </li>
+  {% empty %}
+    <li>No hay contratos recientes.</li>
+  {% endfor %}
+</ul>
+
+
+

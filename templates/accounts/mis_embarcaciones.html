@@ -1,0 +1,23 @@
+{% include "parciales/menu_simple.html" with active_nav="mis_embarcaciones" menu_kind="user" %}
+
+<h1>Mis embarcaciones</h1>
+
+<p><strong>Usuario:</strong> {{ request.user.username }}</p>
+
+{% if embarcaciones %}
+  <ul>
+    {% for e in embarcaciones %}
+      <li>
+        <strong>{{ e.get_tipo_display|default:e.tipo }}</strong>
+        — Matrícula: {{ e.matricula }}
+        {% if e.nombre %} — Nombre: {{ e.nombre }}{% endif %}
+        {% if e.amarra %} — Amarra: {{ e.amarra }}{% endif %}
+        {% if e.organization %} — Org: {{ e.organization.name|default:e.organization }}{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No tienes embarcaciones registradas.</p>
+{% endif %}
+
+<p><a href="{% url 'accounts:dashboard' %}">Volver al dashboard</a></p>

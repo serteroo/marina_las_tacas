@@ -1,0 +1,25 @@
+{% include "parciales/menu_simple.html" with active_nav="perfil" menu_kind=menu_kind %}
+
+<h1>Cambiar nombre de usuario</h1>
+
+<p><strong>Usuario actual:</strong> {{ request.user.username }}</p>
+
+{% if not can_change %}
+  <p style="color:crimson">No puedes cambiar tu usuario todavía.
+  {% if last_change %}Último cambio: {{ last_change|date:"d/m/Y H:i" }}{% endif %}</p>
+{% endif %}
+
+<form method="post" style="margin-top:12px">
+  {% csrf_token %}
+  <label for="{{ form.username.id_for_label }}">Nuevo usuario</label><br>
+  {{ form.username }}<br>
+  {% if form.username.errors %}
+    <small style="color:crimson">
+      {% for e in form.username.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+    </small>
+  {% endif %}
+  <br>
+  <button type="submit" {% if not can_change %}disabled{% endif %}>Cambiar</button>
+</form>
+
+<p style="margin-top:12px"><a href="{% url 'accounts:perfil' %}">Volver</a></p>

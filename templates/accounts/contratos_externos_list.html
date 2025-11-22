@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Contratos externos</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:16px;}
+    h3{margin:0 0 10px}
+    .toolbar{margin:10px 0;display:flex;gap:12px;align-items:center}
+    .msg{padding:6px 10px;border:1px solid #ddd;background:#f6f6f6;margin:8px 0;border-radius:4px}
+    table{width:100%;border-collapse:collapse;margin-top:6px}
+    th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
+    th{background:#f2f2f2;text-align:left}
+    .small{color:#555;font-size:.9em}
+    .bad{color:#b00020;font-weight:600}
+    .actions a{margin-right:8px}
+    .pager{display:flex;gap:8px;align-items:center;margin-top:10px}
+  </style>
+</head>
+<body>
+
+<h3>Contratos externos</h3>
+
+<div class="toolbar">
+  <form method="get">
+    <label>Estado:
+      <select name="estado" onchange="this.form.submit()">
+        <option value="" {% if not filtro_estado %}selected{% endif %}>Todos</option>
+        <option value="PENDIENTE" {% if filtro_estado == "PENDIENTE" %}selected{% endif %}>Pendientes</option>
+        <option value="APROBADO"  {% if filtro_estado == "APROBADO" %}selected{% endif %}>Aprobados</option>
+        <option value="RECHAZADO" {% if filtro_estado == "RECHAZADO" %}selected{% endif %}>Rechazados</option>
+      </select>
+    </label>
+  </form>
+
+  <a href="{% url 'accounts:contrato_externo_new' %}">+ Nuevo contrato</a>
+</div>
+
+{% if messages %}
+  {% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}
+{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Solicitante</th>
+      <th>Embarcación</th>
+      <th>Rango</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for c in contratos %}
+    <tr>
+      <td>
+        {{ c.apellido }}, {{ c.nombre }}<br>
+        <span class="small">{{ c.rut }} · {{ c.email }} · {{ c.telefono }}</span>
+      </td>
+      <td>{{ c.get_tipo_artefacto_display }} — {{ c.detalle_artefacto }}</td>
+      <td>{{ c.fecha_inicio }} → {{ c.fecha_fin }}</td>
+      <td>
+        {% if c.licencia_vencida %}<span class="bad">Licencia vencida</span><br>{% endif %}
+        <span class="small">{{ c.get_estado_display }}</span>
+      </td>
+      <td class="actions">
+        <a href="{% url 'accounts:contrato_externo_detail' c.pk %}">Ver</a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">No hay contratos.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+<div class="pager">
+  {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}">« Anterior</a>
+  {% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}">Siguiente »</a>
+  {% endif %}
+</div>
+{% endif %}
+
+</body>
+</html>

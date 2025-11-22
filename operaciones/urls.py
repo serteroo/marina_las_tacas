@@ -1,6 +1,7 @@
 # operaciones/urls.py
 from django.urls import path
 from . import views
+from operaciones import views
 
 app_name = "operaciones"
 
@@ -14,4 +15,6 @@ urlpatterns = [
     path("zarpe/aprobar/<int:mov_id>/", views.aprobar_zarpe, name="aprobar_zarpe"),
     path("zarpe/salida/<int:mov_id>/", views.marcar_salida, name="marcar_salida"),
     path("zarpe/arribo/<int:mov_id>/", views.marcar_arribo, name="marcar_arribo"),
+    path("movimientos/<int:pk>/revisar/", views.movimiento_revisar, name="movimiento_revisar"),
+    path("mis-zarpes/", views.mis_zarpes, name="mis_zarpes"),
 ]

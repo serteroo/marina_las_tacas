@@ -1,6 +1,9 @@
 import re
 from django.core.exceptions import ValidationError
 
+MAX_IMAGE_SIZE_MB = 5
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
 RUT_REGEX = r"^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$"
 
 
@@ -25,3 +28,12 @@ def validar_password_fuerte(pw:str):
     if not re.search(r"[a-z]", pw): raise ValidationError("Debe incluir una minúscula.")
     if not re.search(r"\d", pw): raise ValidationError("Debe incluir un dígito.")
     if not re.search(r"[^A-Za-z0-9]", pw): raise ValidationError("Debe incluir un carácter especial.")
+
+def validate_image_size(image):
+    if image.size > MAX_IMAGE_SIZE_MB * 1024 * 1024:
+        raise ValidationError(f"La imagen no puede superar los {MAX_IMAGE_SIZE_MB} MB.")
+
+def validate_image_content_type(image):
+    content_type = getattr(image, "content_type", None)
+    if content_type not in ALLOWED_CONTENT_TYPES:
+        raise ValidationError("Formato de imagen no permitido. Usa JPG, PNG o WEBP.")

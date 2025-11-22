@@ -8,26 +8,33 @@ from accounts.views import is_supervisor
 from .forms import AprobarZarpeForm
 from .forms import SolicitarZarpeForm
 from django.contrib import messages
+from accounts.roles import is_supervisor, is_supervisor_strict, is_secretaria, is_socio, menu_kind_for
+from accounts.security import audit
 
 def healthz(request): return HttpResponse("ok")
 
-def is_supervisor(user):
-    return user.groups.filter(name__in=["Supervisor","Secretaria"]).exists() or user.is_superuser
 
 @login_required
 @user_passes_test(is_supervisor)
 def toggle_bloqueo(request):
     prof = UserProfile.objects.get(user=request.user)
-    obj, _ = BloqueoClima.objects.get_or_create(organization=prof.organization, defaults={"creado_por": prof})
+    obj, _ = BloqueoClima.objects.get_or_create(
+        organization=prof.organization,
+        defaults={"creado_por": prof}
+    )
     obj.is_blocked = not obj.is_blocked
-    obj.motivo = request.POST.get("motivo","")
+    obj.motivo = request.POST.get("motivo", "")
     obj.override_por = prof if not obj.is_blocked else None
     obj.save()
-    if (
-        request.user.is_superuser
-        or request.user.groups.filter(name__in=["Supervisor", "Secretaría"]).exists()
-    ):
-        return redirect("accounts:dashboard_supervisor")
+
+    audit(
+        request.user,
+        action="toggle_bloqueo_clima",
+        obj=obj,
+        details={"is_blocked": obj.is_blocked, "motivo": obj.motivo},
+    )
+
+    return redirect("accounts:dashboard_supervisor")
 
 
 
@@ -68,7 +75,14 @@ def solicitar_zarpe(request, emb_id):
 @login_required
 @user_passes_test(is_supervisor)
 def aprobar_zarpe(request, mov_id):
-    mov = get_object_or_404(Movimiento.objects.select_related("socio__user","embarcacion"), id=mov_id)
+    prof = UserProfile.objects.select_related("organization").get(user=request.user)
+    org = prof.organization
+
+    mov = get_object_or_404(
+        Movimiento.objects.select_related("socio__user", "embarcacion"),
+        id=mov_id,
+        organization=org,   # <<< amarra a la org del supervisor
+    )
 
     if request.method == "POST":
         if "aprobar" in request.POST:
@@ -82,7 +96,6 @@ def aprobar_zarpe(request, mov_id):
             messages.warning(request, "Solicitud rechazada.")
         return redirect("accounts:dashboard_supervisor")
 
-    # GET: muestra ficha con datos
     return render(request, "operaciones/aprobar_zarpe.html", {"mov": mov})
 
 
@@ -112,4 +125,52 @@ def marcar_arribo(request, mov_id):
     mov.hora_arribo = timezone.now()
     mov.save()
     return redirect("accounts:dashboard_supervisor")
+
+@login_required
+@user_passes_test(is_supervisor)
+def movimiento_revisar(request, pk):
+    prof = UserProfile.objects.select_related("organization").get(user=request.user)
+    org = prof.organization
+
+    mov = get_object_or_404(Movimiento, pk=pk, organization=org)
+
+    # Si no está SOLICITADO, no tiene sentido “revisar”
+    if mov.estado != "SOLICITADO":
+        messages.info(request, f"El movimiento ya está {mov.get_estado_display().lower()}.")
+        return redirect("accounts:dashboard_supervisor")
+
+    return render(request, "operaciones/movimiento_revisar.html", {"mov": mov})
+
+@login_required
+def mis_zarpes(request):
+    prof = UserProfile.objects.select_related("organization").get(user=request.user)
+    org = prof.organization
+
+    ESTADOS = ["SOLICITADO", "APROBADO", "EN_SALIDA", "EN_ARRIBO", "CERRADO", "RECHAZADO"]
+
+    estado = request.GET.get("estado", "")
+    try:
+        lim = int(request.GET.get("lim", "50"))
+    except ValueError:
+        lim = 50
+    lim = max(1, min(lim, 200))
+
+    qs = (
+        Movimiento.objects
+        .filter(organization=org, socio=prof)    # <<< org + socio
+        .select_related("embarcacion")
+        .order_by("-id")
+    )
+
+    if estado in ESTADOS:
+        qs = qs.filter(estado=estado)
+
+    ctx = {
+        "active_nav": "mis_zarpes",
+        "movs": qs[:lim],
+        "estados": ESTADOS,
+        "estado": estado,
+        "lim": lim,
+    }
+    return render(request, "operaciones/mis_zarpes.html", ctx)
 

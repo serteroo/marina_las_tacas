@@ -24,22 +24,26 @@ class MFAChallengeAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at",)
 
 
-@admin.register(ContratoExterno)
 class ContratoExternoAdmin(admin.ModelAdmin):
-    # ⚠️ SOLO campos que existen en el modelo
-    list_display  = (
+    list_display = (
         "organization",
-        "apellido", "nombre",
-        "rut",
-        "licencia_numero",
-        "licencia_vencimiento",
-        "licencia_validada",
-        "telefono", "email",
-        "creado_en",
+        "apellido", "nombre", "rut",
+        "licencia_numero", "licencia_vencimiento", "licencia_validada",
+        "tipo_artefacto", "detalle_artefacto",
+        "estado", "creado_en",
     )
-    list_filter   = ("organization", "licencia_validada", "licencia_vencimiento", "creado_en")
+    list_filter = ("organization", "licencia_validada", "licencia_vencimiento", "estado", "creado_en")
     search_fields = ("rut", "apellido", "nombre", "licencia_numero", "telefono", "email")
     date_hierarchy = "licencia_vencimiento"
-    readonly_fields = ("creado_en",)
+    readonly_fields = ("creado_en", "actualizado_en")
+    ordering = ("-creado_en",)
+
+    fieldsets = (
+        ("Organización", {"fields": ("organization",)}),
+        ("Solicitante", {"fields": (("nombre", "apellido"), "rut", ("email", "telefono"))}),
+        ("Licencia", {"fields": (("licencia_numero", "licencia_vencimiento"), "licencia_validada")}),
+        ("Embarcación y fechas", {"fields": (("tipo_artefacto", "detalle_artefacto"), ("fecha_inicio", "fecha_fin"))}),
+        ("Gestión", {"fields": (("estado", "supervisor"), "observaciones", ("creado_en", "actualizado_en"))}),
+    )
 
 

@@ -1,0 +1,101 @@
+{% include "parciales/menu_simple.html" with active_nav="contratos_list" menu_kind="super" %}
+
+
+<h1>Contratos</h1>
+
+<form method="get" style="margin:12px 0; display:flex; gap:8px; flex-wrap:wrap;">
+  <select name="vigencia">
+    <option value="activos"   {% if vigencia == "activos" %}selected{% endif %}>Activos</option>
+    <option value="inactivos" {% if vigencia == "inactivos" %}selected{% endif %}>Inactivos</option>
+    <option value="todos"     {% if vigencia == "todos" %}selected{% endif %}>Todos</option>
+  </select>
+
+  <select name="estado">
+    <option value="">(Todos los Estados)</option>
+    {% for k,v in ESTADOS %}
+      <option value="{{ k }}" {% if estado == k %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="tipo">
+    <option value="">(Todos los Tipos)</option>
+    {% for k,v in TIPOS %}
+      <option value="{{ k }}" {% if tipo == k %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select>
+
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar Nombre, RUT, Email, Teléfono, Licencia, Detalle" style="width:360px;">
+  <button type="submit">Filtrar</button>
+  <a href="?">Limpiar</a>
+
+  {# link de export a Excel preservando filtros #}
+  <a href="{% url 'accounts:contratos_export_xlsx' %}?q={{ q|urlencode }}&vigencia={{ vigencia }}&estado={{ estado }}&tipo={{ tipo }}" style="margin-left:12px;">Exportar a Excel</a>
+</form>
+
+<p>Total: {{ contratos|length }}</p>
+
+<table border="1" cellspacing="0" cellpadding="6">
+  <tr>
+    <th>ID</th>
+    <th>Apellido</th>
+    <th>Nombre</th>
+    <th>RUT</th>
+    <th>Email</th>
+    <th>Teléfono</th>
+    <th>Tipo</th>
+    <th>Detalle</th>
+    <th>Inicio</th>
+    <th>Fin</th>
+    <th>Vigente</th>
+    <th>Estado</th>
+    <th>Supervisor</th>
+    <th>N° Licencia</th>
+    <th>Venc. Licencia</th>
+  </tr>
+  {% for c in contratos %}
+    <tr>
+      <td>{{ c.id }}</td>
+      <td>{{ c.apellido }}</td>
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.rut|default:"—" }}</td>
+      <td>{{ c.email|default:"—" }}</td>
+      <td>{{ c.telefono|default:"—" }}</td>
+      <td>{{ c.get_tipo_artefacto_display|default:"—" }}</td>
+      <td>{{ c.detalle_artefacto|default:"—" }}</td>
+      <td>{{ c.fecha_inicio|date:"Y-m-d"|default:"—" }}</td>
+      <td>{{ c.fecha_fin|date:"Y-m-d"|default:"—" }}</td>
+      <td>
+        {% if not c.fecha_fin or c.fecha_fin >= today|default:None %}
+          {# si no pasas today desde la vista, el export ya calcula; aquí simplificamos con lógica #}
+          {% if not c.fecha_fin %}Sí{% else %}{% if c.fecha_fin >= now|date:"Y-m-d" %}Sí{% else %}No{% endif %}{% endif %}
+        {% endif %}
+      </td>
+      <td>{{ c.estado|default:"—" }}</td>
+      <td>{% if c.supervisor %}{{ c.supervisor.get_full_name|default:c.supervisor.username }}{% else %}—{% endif %}</td>
+      <td>{{ c.licencia_numero|default:"—" }}</td>
+      <td>{{ c.licencia_vencimiento|date:"Y-m-d"|default:"—" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="15">Sin resultados.</td></tr>
+  {% endfor %}
+</table>
+
+<p><a href="{% url 'accounts:dashboard_supervisor' %}">Volver al dashboard</a></p>
+
+{% if paginator.num_pages > 1 %}
+  <nav style="margin-top:12px;">
+    {% if page_obj.has_previous %}
+      <a href="{{ page_qs }}page=1">« Primero</a>
+      <a href="{{ page_qs }}page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+    {% endif %}
+
+    <span> Página {{ page_obj.number }} de {{ paginator.num_pages }} · {{ paginator.count }} contratos </span>
+
+    {% if page_obj.has_next %}
+      <a href="{{ page_qs }}page={{ page_obj.next_page_number }}">Siguiente ›</a>
+      <a href="{{ page_qs }}page={{ paginator.num_pages }}">Última »</a>
+    {% endif %}
+  </nav>
+{% endif %}
+
+

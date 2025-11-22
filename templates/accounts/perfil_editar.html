@@ -1,0 +1,16 @@
+{% include "parciales/menu_simple.html" with active_nav="perfil" menu_kind=menu_kind %}
+
+<!doctype html><meta charset="utf-8">
+<h2>Editar perfil</h2>
+
+{% if messages %}<ul>{% for m in messages %}<li>{{ m }}</li>{% endfor %}</ul>{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <p><label>Email</label><br>{{ form.email }}</p>
+  <p><label>Teléfono</label><br>{{ form.telefono }}</p>
+  <p><label>Foto</label><br>{{ form.foto }}</p>
+  <button type="submit">Guardar</button>
+</form>
+
+<p><a href="{% url 'accounts:perfil' %}">Volver</a></p>

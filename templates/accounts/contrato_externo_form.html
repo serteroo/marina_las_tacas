@@ -5,3 +5,25 @@
   <button type="submit">Guardar</button>
 </form>
 {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Aplica a todos los inputs llamados "rut" (ContratoExterno y Applicant usan ese name)
+  document.querySelectorAll('input[name="rut"]').forEach(function (el) {
+    el.addEventListener("blur", function () {
+      let v = (el.value || "").toUpperCase().replace(/[^0-9K]/g, ""); // deja solo dígitos y K
+      if (v.length < 2) return; // no formatear si está incompleto
+
+      const cuerpo = v.slice(0, -1);
+      const dv = v.slice(-1);
+      // agrupa cuerpo de a 3 desde la derecha
+      let c = cuerpo, partes = [];
+      while (c.length > 3) { partes.unshift(c.slice(-3)); c = c.slice(0, -3); }
+      if (c) partes.unshift(c);
+
+      el.value = partes.join(".") + "-" + dv;
+    });
+  });
+});
+</script>
+

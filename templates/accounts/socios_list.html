@@ -1,0 +1,33 @@
+{% include "parciales/menu_simple.html" with active_nav="socios_list" menu_kind="super" %}
+
+<h1>Socios</h1>
+
+<form method="get" style="margin:12px 0;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Buscar nombre, rut, email, teléfono" style="width:360px;">
+  <button type="submit">Filtrar</button>
+  <a href="?">Limpiar</a>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="{% url 'accounts:socios_export_xlsx' %}?q={{ q|urlencode }}">Exportar Excel (XLSX)</a>
+</form>
+
+<p>Total: {{ socios|length }}</p>
+
+<table border="1" cellspacing="0" cellpadding="6">
+  <tr>
+    <th>Apellido</th><th>Nombre</th><th>Email</th><th>RUT</th><th>Teléfono</th><th>N° Licencia</th>
+  </tr>
+  {% for s in socios %}
+    <tr>
+      <td>{{ s.user.last_name }}</td>
+      <td>{{ s.user.first_name }}</td>
+      <td>{{ s.email }}</td>
+      <td>{{ s.rut|default:"—" }}</td>
+      <td>{{ s.telefono|default:"—" }}</td>
+      <td>{{ s.licencia_numero|default:"—" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">Sin resultados.</td></tr>
+  {% endfor %}
+</table>
+
+<p><a href="{% url 'accounts:dashboard_supervisor' %}">Volver al dashboard</a></p>
